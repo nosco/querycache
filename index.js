@@ -52,12 +52,14 @@ QueryCache.prototype.invalidate = function () {
 };
 
 QueryCache.prototype.get = function (key) {
-  if (connectionEstablished && this.enabled) return this._cache[key];
+  if (connectionEstablished && this.enabled) {
+    return this._cache[JSON.stringify(key)];
+  }
 };
 
 QueryCache.prototype.set = function (key, value) {
   if (connectionEstablished && this.enabled) {
-    this._cache[key] = value;
+    this._cache[JSON.stringify(key)] = value;
     return value;
   }
 };
