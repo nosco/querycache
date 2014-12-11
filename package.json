@@ -1,0 +1,38 @@
+{
+  "name": "querycache",
+  "version": "0.0.1",
+  "description": "Caching layer for optimizing mongodb read queries. The cache is invalidated on specified oplog events.",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "mongodb": "^1.4.23"
+  },
+  "devDependencies": {
+    "tap": "^0.4.13"
+  },
+  "scripts": {
+    "test": "tap test/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nosco/querycache"
+  },
+  "keywords": [
+    "caching",
+    "mongodb",
+    "query",
+    "cache",
+    "invalidate",
+    "oplog",
+    "optimize",
+    "speed"
+  ],
+  "author": "Elias G. Schneevoigt <eliasgs@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nosco/querycache/issues"
+  },
+  "homepage": "https://github.com/nosco/querycache"
+}
