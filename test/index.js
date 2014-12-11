@@ -2,15 +2,17 @@ var test = require('tap').test;
 var mongo = require('mongodb').MongoClient;
 var QueryCache = require('../');
 
-var URI = process.env.QUERYCACHE_TEST_URI || 'mongodb://127.0.0.1:27017/test';
+var DB  = process.env.QUERYCACHE_TEST_DB || 'test';
+var URI = process.env.QUERYCACHE_URI || 'mongodb://127.0.0.1:27017';
 
 
 QueryCache._eventbus.once('enable', function () {
   mongo.connect(URI, function (err, db) {
     if (err) throw err;
+    db = db.db(DB);
     test('Basic cache read/write operations', function (t) {
       var qcache = new QueryCache({
-        dbName: 'test',
+        dbName: DB,
         collections: ['test1', 'test2']
       });
       var a = qcache.set('some key', 'some val');
@@ -22,18 +24,18 @@ QueryCache._eventbus.once('enable', function () {
     test('Basic cache invalidations', function (t) {
       t.plan(2);
       var qcache = new QueryCache({
-        dbName: 'test',
+        dbName: DB,
         collections: ['test1', 'test2']
       });
       qcache.set('some key', 'some val');
 
-      QueryCache._eventbus.once('test.test1', function () {
+      QueryCache._eventbus.once(DB + '.test1', function () {
         t.deepEqual(qcache._cache, {}, 'cache is empty');
         qcache.set('some key', 'some val');
         insert('test2');
       });
 
-      QueryCache._eventbus.once('test.test2', function () {
+      QueryCache._eventbus.once(DB + '.test2', function () {
         t.deepEqual(qcache._cache, {}, 'cache is empty');
       });
 
