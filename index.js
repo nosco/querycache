@@ -67,7 +67,7 @@ QueryCache.prototype.set = function (key, value) {
 eventbus.on('enable', function () {connectionEstablished = true;});
 eventbus.on('disable', function () {connectionEstablished = false;});
 
-if (process.env.QUERYCACHE_ENABLE) {
+if (process.env.QUERYCACHE_ENABLE === 'true') {
   mongo.connect(URI, function (err, db) {
     if (err) {
      console.log('Could not enable cache!!');
