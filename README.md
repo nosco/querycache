@@ -23,6 +23,9 @@ npm install querycache
 Configurations are managed by the following environmental variables
 
 ```bash
+QUERYCACHE_ENABLE             # To enable the cache set this to 'true'. Default
+                              # behaviour is not to enable the cache.
+
 QUERYCACHE_URI                # The mongodb 'local' database connection string,
                               # defaults to "mongodb://127.0.0.1:27017/local".
 
