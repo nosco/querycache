@@ -67,35 +67,37 @@ QueryCache.prototype.set = function (key, value) {
 eventbus.on('enable', function () {connectionEstablished = true;});
 eventbus.on('disable', function () {connectionEstablished = false;});
 
-mongo.connect(URI, function (err, db) {
-  if (err) {
-   console.log('Could not enable cache!!');
-   console.log(URI);
-   return console.log(err);
-  }
-  var cursorOptions = {
-    tailable: true,
-    numberOfRetries: -1
-  };
-  var oplog = db.collection('oplog.rs');
+if (process.env.QUERYCACHE_ENABLE) {
+  mongo.connect(URI, function (err, db) {
+    if (err) {
+     console.log('Could not enable cache!!');
+     console.log(URI);
+     return console.log(err);
+    }
+    var cursorOptions = {
+      tailable: true,
+      numberOfRetries: -1
+    };
+    var oplog = db.collection('oplog.rs');
 
-  // silly mongo driver seems to have made a switcheroo on the Timestamp
-  // argument order
-  var now = new Timestamp(0, Date.now()/1000)
+    // silly mongo driver seems to have made a switcheroo on the Timestamp
+    // argument order
+    var now = new Timestamp(0, Date.now()/1000)
 
-  var stream = oplog.find({ts: {$gt: now}}, {ns: 1}, cursorOptions)
-                     .sort({$natural: -1}).stream();
-  // start caching
-  eventbus.emit('enable');
-  stream.on('data', function (doc) {
-    eventbus.emit(doc.ns);
+    var stream = oplog.find({ts: {$gt: now}}, {ns: 1}, cursorOptions)
+                       .sort({$natural: -1}).stream();
+    // start caching
+    eventbus.emit('enable');
+    stream.on('data', function (doc) {
+      eventbus.emit(doc.ns);
+    });
+    stream.on('end', function () {
+      console.log('Oplog stream ended - disabling cache');
+      eventbus.emit('disable');
+    });
+    stream.on('error', function (err) {
+      console.error(err);
+      eventbus.emit('disable');
+    });
   });
-  stream.on('end', function () {
-    console.log('Oplog stream ended - disabling cache');
-    eventbus.emit('disable');
-  });
-  stream.on('error', function (err) {
-    console.error(err);
-    eventbus.emit('disable');
-  });
-});
+}
