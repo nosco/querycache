@@ -85,7 +85,7 @@ if (process.env.QUERYCACHE_ENABLE === 'true') {
     var now = new Timestamp(0, Date.now()/1000)
 
     var stream = oplog.find({ts: {$gt: now}}, {ns: 1}, cursorOptions)
-                       .sort({$natural: -1}).stream();
+                      .sort({$natural: -1}).stream();
     // start caching
     eventbus.emit('enable');
     stream.on('data', function (doc) {
