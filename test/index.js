@@ -89,6 +89,31 @@ test('Cache enabled', function (enabled) {
           t.equal(val, 'val3', 'Third entry intact');
           t.end();
         });
+        test('QueryCache#maxEntries is set correctly', function (t) {
+          var qcache = new QueryCache({
+            dbName: DB,
+            collections: ['test1', 'test2']
+          });
+          t.equal(qcache.maxEntries, 100000, 'Default is 100000');
+
+          process.env.QUERYCACHE_MAX_ENTRIES = '10';
+          delete require.cache[require.resolve('../')];
+          QueryCache = require('../');
+          qcache = new QueryCache({
+            dbName: DB,
+            collections: ['test1', 'test2']
+          });
+          t.equal(qcache.maxEntries, 10, 'Can be set by environmental var');
+
+          qcache = new QueryCache({
+            dbName: DB,
+            collections: ['test1', 'test2'],
+            maxEntries: 20
+          });
+          t.equal(qcache.maxEntries, 20, 'Can be overwritten by constructor');
+          t.end();
+        });
+
         test('exit', function (t) {
           process.exit(0);
         });
