@@ -30,7 +30,9 @@ QUERYCACHE_URI                # The mongodb 'local' database connection string,
                               # defaults to "mongodb://127.0.0.1:27017/local".
 
 QUERYCACHE_MAX_ENTRIES        # The maximum allowed number of entries to hold
-                              # in cache, defaults to 100000.
+                              # in cache, defaults to 100000. This setting can
+                              # be overwritten by the ``maxEntries``
+                              # constructor option.
 ```
 
 If ``QUERYCACHE_MAX_ENTRIES`` is reached, the oldest entry is removed when a
