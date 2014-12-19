@@ -1,6 +1,6 @@
 {
   "name": "querycache",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "description": "Caching layer for optimizing mongodb read queries. The cache is invalidated on specified oplog events.",
   "main": "index.js",
   "directories": {
