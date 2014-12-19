@@ -52,6 +52,43 @@ test('Cache enabled', function (enabled) {
             });
           }
         });
+        test('Honour the MAX_ENTRIES bound', function (t) {
+          var maxEntries = 2;
+          var qcache = new QueryCache({
+            dbName: DB,
+            collections: ['test1', 'test2'],
+            maxEntries: maxEntries
+          });
+          var entries;
+          for (var i=1;i<5;i++) {
+            qcache.set(i, i);
+            entries = Object.keys(qcache._cache).length;
+            if (i>maxEntries) {
+              t.equal(entries, maxEntries,
+                      'Correct number of entries: ' + maxEntries);
+            } else {
+              t.equal(entries, i, 'Correct number of entries: ' + i);
+            }
+          }
+          t.end();
+        });
+        test('When MAX_ENTRIES is reached, remove oldest entry', function (t) {
+          var qcache = new QueryCache({
+            dbName: DB,
+            collections: ['test1', 'test2'],
+            maxEntries: 2,
+          });
+          qcache.set('key1', 'val1');
+          qcache.set('key2', 'val2');
+          qcache.set('key3', 'val3');
+          val = qcache.get('key1');
+          t.equal(val, undefined, 'Oldest entry removed');
+          val = qcache.get('key2');
+          t.equal(val, 'val2', 'Second entry intact');
+          val = qcache.get('key3');
+          t.equal(val, 'val3', 'Third entry intact');
+          t.end();
+        });
         test('exit', function (t) {
           process.exit(0);
         });
