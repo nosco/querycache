@@ -7,10 +7,10 @@ var EventEmitter = require('events').EventEmitter;
 var eventbus = new EventEmitter();
 eventbus.setMaxListeners(0);
 
-var URI = process.env.QUERYCACHE_URI || 'mongodb://127.0.0.1:27017/local';
+var URI = process.env.QC_URI || 'mongodb://127.0.0.1:27017/local';
 
-var DEFAULT_MAX_ENTRIES = (process.env.QUERYCACHE_MAX_ENTRIES)?
-                          parseInt(process.env.QUERYCACHE_MAX_ENTRIES, 10):
+var DEFAULT_MAX_ENTRIES = (process.env.QC_MAX_ENTRIES)?
+                          parseInt(process.env.QC_MAX_ENTRIES, 10):
                           100000;
 
 module.exports = QueryCache;
@@ -29,8 +29,8 @@ function QueryCache(options) {
   self.collections = options.collections;
 
   // The maximum number of allowed entries in cache can be specified either by
-  // environmental variable QUERYCACHE_MAX_ENTRIES or the maxEntries option to
-  // the constructor, which gets prioritized over QUERYCACHE_MAX_ENTRIES.
+  // environmental variable QC_MAX_ENTRIES or the maxEntries option to
+  // the constructor, which gets prioritized over QC_MAX_ENTRIES.
   self.maxEntries = DEFAULT_MAX_ENTRIES;
   if (options.maxEntries) {
     self.maxEntries = options.maxEntries;
@@ -86,7 +86,7 @@ QueryCache.prototype.set = function (key, value) {
 eventbus.on('enable', function () {connectionEstablished = true;});
 eventbus.on('disable', function () {connectionEstablished = false;});
 
-if (process.env.QUERYCACHE_ENABLE === 'true') {
+if (process.env.QC_ENABLE === 'true') {
   mongo.connect(URI, function (err, db) {
     if (err) {
      console.log('Could not enable cache!!');

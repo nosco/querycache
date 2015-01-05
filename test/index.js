@@ -2,8 +2,8 @@ var test = require('tap').test;
 var mongo = require('mongodb').MongoClient;
 var QueryCache = require('../');
 
-var DB   = process.env.QUERYCACHE_TEST_DB || 'test';
-var URI  = process.env.QUERYCACHE_URI || 'mongodb://127.0.0.1:27017';
+var DB   = process.env.QC_TEST_DB || 'test';
+var URI  = process.env.QC_URI || 'mongodb://127.0.0.1:27017';
 
 test('Cache enabled', function (enabled) {
   QueryCache._eventbus.once('enable', function () {
@@ -96,7 +96,7 @@ test('Cache enabled', function (enabled) {
           });
           t.equal(qcache.maxEntries, 100000, 'Default is 100000');
 
-          process.env.QUERYCACHE_MAX_ENTRIES = '10';
+          process.env.QC_MAX_ENTRIES = '10';
           delete require.cache[require.resolve('../')];
           QueryCache = require('../');
           qcache = new QueryCache({
