@@ -29,13 +29,17 @@ function QueryCache(options) {
 
   var datastore = options.datastore || 'default';
   var Store = require('./datastores/' + datastore);
-  self.cache = new Store({maxEntries: options.maxEntries});
+  self.cache = new Store({
+    maxEntries: options.maxEntries,
+    namespace: options.namespace || self.dbName
+  });
 
   // Register event listeners
   self.collections.forEach(function (collection) {
     eventbus.on(self.dbName + '.' + collection, handleInvalidation);
   });
   eventbus.on(self.dbName + '.$cmd', handleInvalidation);
+
   function handleInvalidation() {
     self.disable();
     self.invalidate(function (err) {
