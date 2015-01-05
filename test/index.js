@@ -19,11 +19,15 @@ test('Cache enabled', function (enabled) {
             dbName: DB,
             collections: ['test1', 'test2']
           });
-          var a = qcache.set('some key', 'some val');
-          var b = qcache.get('some key');
-          t.equal(a, 'some val', '#set returns the value');
-          t.equal(b, 'some val', '#get returns the value');
-          t.end();
+          qcache.set('some key', 'some val', function (err, a) {
+            t.error(err);
+            qcache.get('some key', function (err, b) {
+              t.error(err);
+              t.equal(a, 'some val', '#set returns the value');
+              t.equal(b, 'some val', '#get returns the value');
+              t.end();
+            });
+          });
         });
         test('Basic automatic cache invalidations', function (t) {
           t.plan(2);
@@ -31,18 +35,27 @@ test('Cache enabled', function (enabled) {
             dbName: DB,
             collections: ['test1', 'test2']
           });
-          qcache.set('some key', 'some val');
+          qcache.set('some key', 'some val', function (err) {
+            if (err) throw err;
+          });
 
           QueryCache._eventbus.once(DB + '.test1', function () {
-            t.equal(qcache.get('some key'), undefined, 'cache is invalidated');
-            qcache.set('some key', 'some val');
-            insert('test2');
+            qcache.get('some key', function (err, val) {
+              if (err) throw err;
+              t.equal(val, undefined, 'cache is invalidated');
+              qcache.set('some key', 'some val', function (err) {
+                t.error(err);
+                insert('test2');
+              });
+            });
           });
 
           QueryCache._eventbus.once(DB + '.test2', function () {
-            t.equal(qcache.get('some key'), undefined, 'cache is invalidated');
+            qcache.get('some key', function (err, val) {
+              if (err) throw err;
+              t.equal(val, undefined, 'cache is invalidated');
+            });
           });
-
 
           insert('test1');
           function insert(colName) {
