@@ -1,33 +1,46 @@
 var test = require('tap').test;
+var async = require('async');
 var Store = require('../datastores/default');
 
 test('Honour the MAX_ENTRIES bound', function (t) {
   var maxEntries = 2;
   var cache = new Store({maxEntries: maxEntries});
-  var entries;
+
+  var setCache = [];
   for (var i=1;i<5;i++) {
-    cache.set(i, i);
-    entries = Object.keys(cache._cache).length;
-    if (i>maxEntries) {
-      t.equal(entries, maxEntries, 'Correct number of entries: ' + maxEntries);
-    } else {
-      t.equal(entries, i, 'Correct number of entries: ' + i);
-    }
+    setCache.push((function (i) {
+      return function (next) {
+        cache.set(i, i, next);
+      };
+    })(i));
   }
-  t.end();
+  async.series(setCache, function (err) {
+    if (err) throw err;
+    var entries = Object.keys(cache._cache).length;
+    t.equal(entries, maxEntries, 'Correct number of entries: ' + maxEntries);
+    t.end();
+  });
 });
 test('When MAX_ENTRIES is reached, remove oldest entry', function (t) {
   var cache = new Store({maxEntries: 2});
-  cache.set('key1', 'val1');
-  cache.set('key2', 'val2');
-  cache.set('key3', 'val3');
-  val = cache.get('key1');
-  t.equal(val, undefined, 'Oldest entry removed');
-  val = cache.get('key2');
-  t.equal(val, 'val2', 'Second entry intact');
-  val = cache.get('key3');
-  t.equal(val, 'val3', 'Third entry intact');
-  t.end();
+  async.series([
+    cache.set.bind(cache, 'key1', 'val1'),
+    cache.set.bind(cache, 'key2', 'val2'),
+    cache.set.bind(cache, 'key3', 'val3')], allSet);
+  function allSet(err) {
+    if (err) throw err;
+    async.series([
+      cache.get.bind(cache, 'key1'),
+      cache.get.bind(cache, 'key2'),
+      cache.get.bind(cache, 'key3')], done);
+    function done(err, values) {
+      if (err) throw err;
+      t.equal(values[0], undefined, 'Oldest entry removed');
+      t.equal(values[1], 'val2', 'Second entry intact');
+      t.equal(values[2], 'val3', 'Third entry intact');
+      t.end();
+    }
+  }
 });
 test('QueryCache#maxEntries is set correctly', function (t) {
   var cache = new Store();
