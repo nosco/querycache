@@ -20,22 +20,23 @@ function Store(options) {
 
 }
 
-Store.prototype.invalidate = function () {
+Store.prototype.invalidate = function (callback) {
   this._cache = {};
   this._cacheKeys = [];
+  callback();
 };
 
-Store.prototype.get = function (key) {
-  return this._cache[JSON.stringify(key)];
+Store.prototype.get = function (key, callback) {
+  callback(null, this._cache[JSON.stringify(key)]);
 };
 
-Store.prototype.set = function (key, value) {
+Store.prototype.set = function (key, value, callback) {
   if (this._cacheKeys.length >= this.maxEntries) {
     delete this._cache[this._cacheKeys.shift()];
   }
   var _key = JSON.stringify(key);
   this._cache[_key] = value;
   this._cacheKeys.push(_key);
-  return value;
+  callback(null, value);
 };
 
