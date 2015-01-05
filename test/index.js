@@ -34,13 +34,13 @@ test('Cache enabled', function (enabled) {
           qcache.set('some key', 'some val');
 
           QueryCache._eventbus.once(DB + '.test1', function () {
-            t.deepEqual(qcache._cache, {}, 'cache is empty');
+            t.deepEqual(qcache.cache._cache, {}, 'cache is empty');
             qcache.set('some key', 'some val');
             insert('test2');
           });
 
           QueryCache._eventbus.once(DB + '.test2', function () {
-            t.deepEqual(qcache._cache, {}, 'cache is empty');
+            t.deepEqual(qcache.cache._cache, {}, 'cache is empty');
           });
 
 
@@ -62,7 +62,7 @@ test('Cache enabled', function (enabled) {
           var entries;
           for (var i=1;i<5;i++) {
             qcache.set(i, i);
-            entries = Object.keys(qcache._cache).length;
+            entries = Object.keys(qcache.cache._cache).length;
             if (i>maxEntries) {
               t.equal(entries, maxEntries,
                       'Correct number of entries: ' + maxEntries);
@@ -94,23 +94,23 @@ test('Cache enabled', function (enabled) {
             dbName: DB,
             collections: ['test1', 'test2']
           });
-          t.equal(qcache.maxEntries, 100000, 'Default is 100000');
+          t.equal(qcache.cache.maxEntries, 100000, 'Default is 100000');
 
           process.env.QC_MAX_ENTRIES = '10';
-          delete require.cache[require.resolve('../')];
+          delete require.cache[require.resolve('../datastores/default')];
           QueryCache = require('../');
           qcache = new QueryCache({
             dbName: DB,
             collections: ['test1', 'test2']
           });
-          t.equal(qcache.maxEntries, 10, 'Can be set by environmental var');
+          t.equal(qcache.cache.maxEntries, 10, 'Can be set by env var');
 
           qcache = new QueryCache({
             dbName: DB,
             collections: ['test1', 'test2'],
             maxEntries: 20
           });
-          t.equal(qcache.maxEntries, 20, 'Can be overwritten by constructor');
+          t.equal(qcache.cache.maxEntries, 20, 'Can be set by constructor');
           t.end();
         });
 
