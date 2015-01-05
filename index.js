@@ -9,9 +9,6 @@ eventbus.setMaxListeners(0);
 
 var URI = process.env.QC_URI || 'mongodb://127.0.0.1:27017/local';
 
-var DEFAULT_MAX_ENTRIES = (process.env.QC_MAX_ENTRIES)?
-                          parseInt(process.env.QC_MAX_ENTRIES, 10):
-                          100000;
 
 module.exports = QueryCache;
 QueryCache._eventbus = eventbus;
@@ -28,18 +25,11 @@ function QueryCache(options) {
   self.dbName = options.dbName;
   self.collections = options.collections;
 
-  // The maximum number of allowed entries in cache can be specified either by
-  // environmental variable QC_MAX_ENTRIES or the maxEntries option to
-  // the constructor, which gets prioritized over QC_MAX_ENTRIES.
-  self.maxEntries = DEFAULT_MAX_ENTRIES;
-  if (options.maxEntries) {
-    self.maxEntries = options.maxEntries;
-  }
-
-  self._cache = {};
-  self._cacheKeys = [];
-
   self.enabled = connectionEstablished;
+
+  var datastore = options.datastore || 'default';
+  var Store = require('./datastores/' + datastore);
+  self.cache = new Store({maxEntries: options.maxEntries});
 
   // Register event listeners
   self.collections.forEach(function (collection) {
@@ -61,25 +51,18 @@ QueryCache.prototype.enable = function () {
 };
 
 QueryCache.prototype.invalidate = function () {
-  this._cache = {};
-  this._cacheKeys = [];
+  this.cache.invalidate();
 };
 
 QueryCache.prototype.get = function (key) {
   if (connectionEstablished && this.enabled) {
-    return this._cache[JSON.stringify(key)];
+    return this.cache.get(key);
   }
 };
 
 QueryCache.prototype.set = function (key, value) {
   if (connectionEstablished && this.enabled) {
-    if (this._cacheKeys.length >= this.maxEntries) {
-      delete this._cache[this._cacheKeys.shift()];
-    }
-    var _key = JSON.stringify(key);
-    this._cache[_key] = value;
-    this._cacheKeys.push(_key);
-    return value;
+    return this.cache.set(key, value);
   }
 };
 
