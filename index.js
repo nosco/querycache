@@ -33,9 +33,16 @@ function QueryCache(options) {
 
   // Register event listeners
   self.collections.forEach(function (collection) {
-    eventbus.on(self.dbName + '.' + collection, self.invalidate.bind(self));
+    eventbus.on(self.dbName + '.' + collection, handleInvalidation);
   });
-  eventbus.on(self.dbName + '.$cmd', self.invalidate.bind(self));
+  eventbus.on(self.dbName + '.$cmd', handleInvalidation);
+  function handleInvalidation() {
+    self.disable();
+    self.invalidate(function (err) {
+      if (err) console.error(err);
+      else self.enable();
+    });
+  }
 
   eventbus.on('enable', self.enable.bind(self));
   eventbus.on('disable', self.disable.bind(self));
@@ -50,19 +57,19 @@ QueryCache.prototype.enable = function () {
   this.enabled = true;
 };
 
-QueryCache.prototype.invalidate = function () {
-  this.cache.invalidate();
+QueryCache.prototype.invalidate = function (callback) {
+  this.cache.invalidate(callback);
 };
 
-QueryCache.prototype.get = function (key) {
+QueryCache.prototype.get = function (key, callback) {
   if (connectionEstablished && this.enabled) {
-    return this.cache.get(key);
+    this.cache.get(key, callback);
   }
 };
 
-QueryCache.prototype.set = function (key, value) {
+QueryCache.prototype.set = function (key, value, callback) {
   if (connectionEstablished && this.enabled) {
-    return this.cache.set(key, value);
+    this.cache.set(key, value, callback);
   }
 };
 
