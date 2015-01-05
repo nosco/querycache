@@ -50,8 +50,13 @@ var querycache = new QueryCache({
   collections: ['test1', 'test2']
 });
 
-querycache.set('some key', 'some value');
-console.log(querycache.get('some key'));
+querycache.set('some key', 'some value', function (err) {
+  if (err) throw err;
+  querycache.get('some key', function (err, value) {
+    if (err) throw err;
+    console.log('Got: ' + value);
+  });
+});
 ```
 
 ```javascript
@@ -65,17 +70,20 @@ var querycache = new QueryCache({
 var someQuery = { values: { $in: [ 'foo', 'bar' ] } };
 mongo.connect('mongodb://127.0.0.1:27017/test', function (err, db) {
   if (err) throw err;
-  var result = querycache.get(someQuery);
-  if (result) {
-    console.log(result);
-  } else {
-    var test1 = db.collection('test1');
-    test1.findOne(someQuery, function (err, result) {
-      if (err) throw err;
-      querycache.set(someQuery, result);
+  querycache.get(someQuery, function (err, result) {
+    if (err || !result) {
+      var test1 = db.collection('test1');
+      test1.findOne(someQuery, function (err, result) {
+        if (err) throw err;
+        querycache.set(someQuery, result, function (err) {
+          if (err) console.error(err);
+          console.log(result);
+        });
+      });
+    } else {
       console.log(result);
-    });
-  }
+    }
+  });
 });
 ```
 }
