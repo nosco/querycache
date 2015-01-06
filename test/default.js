@@ -35,7 +35,7 @@ test('When MAX_ENTRIES is reached, remove oldest entry', function (t) {
       cache.get.bind(cache, 'key3')], done);
     function done(err, values) {
       if (err) throw err;
-      t.equal(values[0], undefined, 'Oldest entry removed');
+      t.equal(values[0], null, 'Oldest entry removed');
       t.equal(values[1], 'val2', 'Second entry intact');
       t.equal(values[2], 'val3', 'Third entry intact');
       t.end();

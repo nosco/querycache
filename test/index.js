@@ -42,7 +42,7 @@ test('Cache enabled', function (enabled) {
           QueryCache._eventbus.once(DB + '.test1', function () {
             qcache.get('some key', function (err, val) {
               if (err) throw err;
-              t.equal(val, undefined, 'cache is invalidated');
+              t.equal(val, null, 'cache is invalidated');
               qcache.set('some key', 'some val', function (err) {
                 t.error(err);
                 insert('test2');
@@ -53,7 +53,7 @@ test('Cache enabled', function (enabled) {
           QueryCache._eventbus.once(DB + '.test2', function () {
             qcache.get('some key', function (err, val) {
               if (err) throw err;
-              t.equal(val, undefined, 'cache is invalidated');
+              t.equal(val, null, 'cache is invalidated');
             });
           });
 

@@ -27,7 +27,7 @@ Store.prototype.invalidate = function (callback) {
 };
 
 Store.prototype.get = function (key, callback) {
-  callback(null, this._cache[JSON.stringify(key)]);
+  callback(null, this._cache[JSON.stringify(key)] || null);
 };
 
 Store.prototype.set = function (key, value, callback) {
