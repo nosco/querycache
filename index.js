@@ -77,6 +77,9 @@ QueryCache.prototype.get = function (key, callback) {
 };
 
 QueryCache.prototype.set = function (key, value, callback) {
+  callback = callback || function (err) {
+    if (err) console.error(err);
+  };
   if (connectionEstablished && this.enabled) {
     this.cache.set(key, value, callback);
   }
