@@ -37,17 +37,9 @@ function QueryCache(options) {
 
   // Register event listeners
   self.collections.forEach(function (collection) {
-    eventbus.on(self.dbName + '.' + collection, handleInvalidation);
+    eventbus.on(self.dbName + '.' + collection, self.invalidate.bind(self));
   });
-  eventbus.on(self.dbName + '.$cmd', handleInvalidation);
-
-  function handleInvalidation() {
-    self.disable();
-    self.invalidate(function (err) {
-      if (err) console.error(err);
-      else self.enable();
-    });
-  }
+  eventbus.on(self.dbName + '.$cmd', self.invalidate.bind(self));
 
   eventbus.on('enable', self.enable.bind(self));
   eventbus.on('disable', self.disable.bind(self));
@@ -63,7 +55,19 @@ QueryCache.prototype.enable = function () {
 };
 
 QueryCache.prototype.invalidate = function (callback) {
-  this.cache.invalidate(callback);
+  var self = this;
+
+  var errorHandler = callback || console.error;
+  callback = callback || function () {};
+
+  self.disable();
+  self.cache.invalidate(function (err) {
+    if (err) errorHandler(err);
+    else {
+      self.enable();
+      callback();
+    }
+  });
 };
 
 QueryCache.prototype.get = function (key, callback) {
