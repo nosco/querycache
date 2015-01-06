@@ -1,9 +1,11 @@
 # querycache
 
 This module provides an easy to use caching layer for any nodejs application
-that needs to optimize speed for mongodb read queries. The cache is an
-in-memory key value store that automatically gets invalidated on specified
-oplog events. For this reason, the mongodb instance must be configured as a
+that needs to optimize speed for mongodb read queries. The cache defaults to a
+in-memory data store, but also has support for redis, which makes it easy for
+multiple frontends to utilize the same cache. The cache automatically gets
+invalidated on any oplog events that reference the specified database and
+collections. For this reason, the mongodb instance must be configured as a
 replicaset. For testing purposes, this can be done by configuring mongo as a
 singleton replicaset:
 
@@ -33,6 +35,10 @@ QC_MAX_ENTRIES                # The maximum allowed number of entries to hold
                               # in cache, defaults to 100000. This setting can
                               # be overwritten by the ``maxEntries``
                               # constructor option.
+
+QC_REDIS_PORT                 # The port to connect to redis on, defaults to
+                              # 6379.
+QC_REDIS_HOST                 # The redis host, defaults to '127.0.0.1'
 ```
 
 If ``QC_MAX_ENTRIES`` is reached, the oldest entry is removed when a new query
@@ -46,7 +52,7 @@ collections: 'test1' or 'test2' in the 'test' database.
 ```javascript
 var QueryCache = require('querycache');
 var querycache = new QueryCache({
-  dbname: 'test',
+  dbName: 'test',
   collections: ['test1', 'test2']
 });
 
@@ -54,7 +60,7 @@ querycache.set('some key', 'some value', function (err) {
   if (err) throw err;
   querycache.get('some key', function (err, value) {
     if (err) throw err;
-    console.log('Got: ' + value);
+    console.log(value);
   });
 });
 ```
@@ -63,7 +69,7 @@ querycache.set('some key', 'some value', function (err) {
 var mongo = require('mongodb').MongoClient;
 var QueryCache = require('querycache');
 var querycache = new QueryCache({
-  dbname: 'test',
+  dbName: 'test',
   collections: ['test1', 'test2']
 });
 
@@ -86,4 +92,21 @@ mongo.connect('mongodb://127.0.0.1:27017/test', function (err, db) {
   });
 });
 ```
-}
+### Using redis as data store
+
+```javascript
+var QueryCache = require('querycache');
+var querycache = new QueryCache({
+  dbName: 'test',
+  collections: ['test1'],
+  datastore: 'redis'
+});
+
+querycache.set('some key', 'some value', function (err) {
+  if (err) throw err;
+  querycache.get('some key', function (err, value) {
+    if (err) throw err;
+    console.log(value);
+  });
+});
+```
