@@ -31,7 +31,8 @@ function QueryCache(options) {
   var Store = require('./datastores/' + datastore);
   self.cache = new Store({
     maxEntries: options.maxEntries,
-    namespace: options.namespace || self.dbName
+    namespace: options.namespace || self.dbName,
+    config: options.config
   });
 
   // Register event listeners
