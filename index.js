@@ -9,7 +9,6 @@ eventbus.setMaxListeners(0);
 
 var URI = process.env.QC_URI || 'mongodb://127.0.0.1:27017/local';
 
-
 module.exports = QueryCache;
 QueryCache._eventbus = eventbus;
 
@@ -73,6 +72,8 @@ QueryCache.prototype.invalidate = function (callback) {
 QueryCache.prototype.get = function (key, callback) {
   if (connectionEstablished && this.enabled) {
     this.cache.get(key, callback);
+  } else {
+    callback();
   }
 };
 
@@ -82,6 +83,8 @@ QueryCache.prototype.set = function (key, value, callback) {
   };
   if (connectionEstablished && this.enabled) {
     this.cache.set(key, value, callback);
+  } else {
+    callback();
   }
 };
 
@@ -91,9 +94,9 @@ eventbus.on('disable', function () {connectionEstablished = false;});
 if (process.env.QC_ENABLE === 'true') {
   mongo.connect(URI, function (err, db) {
     if (err) {
-     console.log('Could not enable cache!!');
-     console.log(URI);
-     return console.log(err);
+     console.error('Could not enable cache!!');
+     console.error(URI);
+     return console.error(err);
     }
     var cursorOptions = {
       tailable: true,
