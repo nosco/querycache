@@ -21,6 +21,7 @@ test('Honour the MAX_ENTRIES bound', function (t) {
     t.end();
   });
 });
+
 test('When MAX_ENTRIES is reached, remove oldest entry', function (t) {
   var cache = new Store({maxEntries: 2});
   async.series([
@@ -42,6 +43,7 @@ test('When MAX_ENTRIES is reached, remove oldest entry', function (t) {
     }
   }
 });
+
 test('QueryCache#maxEntries is set correctly', function (t) {
   var cache = new Store();
   t.equal(cache.maxEntries, 100000, 'Default is 100000');
@@ -56,9 +58,3 @@ test('QueryCache#maxEntries is set correctly', function (t) {
   t.equal(cache.maxEntries, 20, 'Can be set by constructor');
   t.end();
 });
-
-test('exit', function (t) {
-  process.exit(0);
-});
-
-function skiptest() {};
