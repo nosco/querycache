@@ -25,12 +25,13 @@ function Store(options) {
 
   this.namespace = options.namespace;
 
-  var redisOptions;
-  if (options.config && options.config.redis) {
-    redisOptions = options.config.redis;
-  }
+  options.config = options.config || {};
 
-  this.client = redis.createClient(PORT, HOST, redisOptions);
+  var port = options.config.port || PORT;
+  var host = options.config.host || HOST;
+  var redisOptions = options.config.redisOptions;
+
+  this.client = redis.createClient(port, host, redisOptions);
 }
 
 Store.prototype.invalidate = function (callback) {
