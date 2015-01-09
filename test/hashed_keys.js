@@ -2,9 +2,6 @@ var test = require('tap').test;
 
 var QueryCache = require('../');
 
-var DB   = process.env.QC_TEST_DB || 'test';
-var URI  = process.env.QC_URI || 'mongodb://127.0.0.1:27017';
-
 var TEST_KEY = 'some key';
 
 test('Cache enabled', function (enabled) {
