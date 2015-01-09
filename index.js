@@ -1,5 +1,7 @@
 'use strict';
 
+var crypto = require('crypto');
+
 var mongo = require('mongodb').MongoClient;
 var Timestamp = require('mongodb').Timestamp;
 
@@ -23,6 +25,8 @@ function QueryCache(options) {
 
   self.dbName = options.dbName;
   self.collections = options.collections;
+
+  self.hashedKeys = options.hashedKeys;
 
   self.enabled = connectionEstablished;
 
@@ -72,6 +76,8 @@ QueryCache.prototype.invalidate = function (callback) {
 QueryCache.prototype.get = function (key, callback) {
   if (connectionEstablished && this.enabled) {
     var _key = JSON.stringify(key);
+    if (this.hashedKeys) _key = this.hash(_key);
+
     this.cache.get(_key, callback);
   } else {
     callback();
@@ -84,10 +90,16 @@ QueryCache.prototype.set = function (key, value, callback) {
   };
   if (connectionEstablished && this.enabled) {
     var _key = JSON.stringify(key);
+    if (this.hashedKeys) _key = this.hash(_key);
+
     this.cache.set(_key, value, callback);
   } else {
     callback();
   }
+};
+
+QueryCache.prototype.hash = function (key) {
+  return crypto.createHash('sha1').update(key).digest('base64');
 };
 
 eventbus.on('enable', function () {connectionEstablished = true;});
