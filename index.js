@@ -71,7 +71,8 @@ QueryCache.prototype.invalidate = function (callback) {
 
 QueryCache.prototype.get = function (key, callback) {
   if (connectionEstablished && this.enabled) {
-    this.cache.get(key, callback);
+    var _key = JSON.stringify(key);
+    this.cache.get(_key, callback);
   } else {
     callback();
   }
@@ -82,7 +83,8 @@ QueryCache.prototype.set = function (key, value, callback) {
     if (err) console.error(err);
   };
   if (connectionEstablished && this.enabled) {
-    this.cache.set(key, value, callback);
+    var _key = JSON.stringify(key);
+    this.cache.set(_key, value, callback);
   } else {
     callback();
   }

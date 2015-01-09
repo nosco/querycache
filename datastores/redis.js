@@ -47,14 +47,14 @@ Store.prototype.invalidate = function (callback) {
 };
 
 Store.prototype.get = function (key, callback) {
-  var _key = this.namespace + '::' + JSON.stringify(key);
+  var _key = this.namespace + '::' + key;
   this.client.get(_key, callback);
 };
 
 Store.prototype.set = function (key, value, callback) {
   var self = this;
 
-  var _key = self.namespace + '::' + JSON.stringify(key);
+  var _key = self.namespace + '::' + key;
 
   if (self._cacheKeys.length >= self.maxEntries) {
     self.client.del(self._cacheKeys.shift(), save);

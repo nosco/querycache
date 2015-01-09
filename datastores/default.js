@@ -27,16 +27,15 @@ Store.prototype.invalidate = function (callback) {
 };
 
 Store.prototype.get = function (key, callback) {
-  callback(null, this._cache[JSON.stringify(key)] || null);
+  callback(null, this._cache[key] || null);
 };
 
 Store.prototype.set = function (key, value, callback) {
   if (this._cacheKeys.length >= this.maxEntries) {
     delete this._cache[this._cacheKeys.shift()];
   }
-  var _key = JSON.stringify(key);
-  this._cache[_key] = value;
-  this._cacheKeys.push(_key);
+  this._cache[key] = value;
+  this._cacheKeys.push(key);
   callback(null, value);
 };
 
