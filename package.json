@@ -9,7 +9,7 @@
   "dependencies": {
     "async": "2.x",
     "mongodb": "2.x",
-    "redis": "3.x"
+    "redis": "2.x"
   },
   "devDependencies": {
     "tap": "*"
